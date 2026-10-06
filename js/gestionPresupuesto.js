@@ -78,6 +78,12 @@ function CrearGasto(descripcion, valor, fecha, ...etiquetas) {
         }
     };
 
+    this.borrarEtiquetas = function (...etiquetasABorrar) {
+        this.etiquetas = this.etiquetas.filter(
+            (etiqueta) => !etiquetasABorrar.includes(etiqueta)
+        );
+    };
+
     // Las etiquetas recibidas en el constructor se añaden con el propio método del objeto
     this.anyadirEtiquetas(...etiquetas);
 }
