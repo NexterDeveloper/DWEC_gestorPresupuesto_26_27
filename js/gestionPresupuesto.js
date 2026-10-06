@@ -20,7 +20,7 @@ function mostrarPresupuesto() {
     return `Tu presupuesto actual es de ${presupuesto} €`;
 }
 
-function CrearGasto(descripcion, valor) {
+function CrearGasto(descripcion, valor, fecha, ...etiquetas) {
     this.descripcion = descripcion;
 
     if (typeof valor === "number" && valor >= 0 && !Number.isNaN(valor)) {
@@ -28,6 +28,12 @@ function CrearGasto(descripcion, valor) {
     } else {
         this.valor = 0;
     }
+
+    // La fecha se guarda como timestamp. Si no se indica o no es válida, se usa la fecha actual
+    let timestamp = Date.parse(fecha);
+    this.fecha = Number.isNaN(timestamp) ? Date.now() : timestamp;
+
+    this.etiquetas = [];
 
     this.mostrarGasto = function () {
         return `Gasto correspondiente a ${this.descripcion} con valor ${this.valor} €`;
@@ -42,6 +48,18 @@ function CrearGasto(descripcion, valor) {
             this.valor = valor;
         }
     };
+
+    this.anyadirEtiquetas = function (...nuevasEtiquetas) {
+        for (let etiqueta of nuevasEtiquetas) {
+            // Solo se añade si no existe ya, para evitar duplicados
+            if (!this.etiquetas.includes(etiqueta)) {
+                this.etiquetas.push(etiqueta);
+            }
+        }
+    };
+
+    // Las etiquetas recibidas en el constructor se añaden con el propio método del objeto
+    this.anyadirEtiquetas(...etiquetas);
 }
 
 function listarGastos() {
