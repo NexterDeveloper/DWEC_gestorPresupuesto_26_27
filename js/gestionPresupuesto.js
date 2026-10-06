@@ -61,6 +61,14 @@ function CrearGasto(descripcion, valor, fecha, ...etiquetas) {
         return texto;
     };
 
+    this.actualizarFecha = function (fecha) {
+        let timestamp = Date.parse(fecha);
+
+        if (!Number.isNaN(timestamp)) {
+            this.fecha = timestamp;
+        }
+    };
+
     this.anyadirEtiquetas = function (...nuevasEtiquetas) {
         for (let etiqueta of nuevasEtiquetas) {
             // Solo se añade si no existe ya, para evitar duplicados
