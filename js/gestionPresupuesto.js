@@ -3,6 +3,8 @@
 
 // Variable global
 let presupuesto = 0;
+let gastos = [];
+let idGasto = 0;
 
 function actualizarPresupuesto(valor) {
     if (typeof valor === "number" && valor >= 0 && !Number.isNaN(valor)) {
