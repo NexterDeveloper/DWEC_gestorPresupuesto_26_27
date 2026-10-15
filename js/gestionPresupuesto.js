@@ -152,7 +152,7 @@ function filtrarGastos({ fechaDesde, fechaHasta, valorMinimo, valorMaximo, descr
         if (descripcionContiene && !gasto.descripcion.toLowerCase().includes(descripcionContiene.toLowerCase())) {
             continue;
         }
-        if (etiquetasTiene && !gasto.etiquetas.some(etiqueta => etiquetasTiene.includes(etiqueta))) {
+        if (etiquetasTiene && etiquetasTiene.length > 0 && !gasto.etiquetas.some(etiqueta => etiquetasTiene.includes(etiqueta))) {
             continue;
         }
         gastosFiltrados.push(gasto);
@@ -161,11 +161,11 @@ function filtrarGastos({ fechaDesde, fechaHasta, valorMinimo, valorMaximo, descr
     return gastosFiltrados;
 }
 
-function agruparGastos(periodo = "mes", { etiquetas = [], fechaDesde, fechaHasta = Date.now() }) {
+function agruparGastos(periodo = "mes", etiquetas = [], fechaDesde, fechaHasta = new Date().toISOString()) {
     let gastosFiltrados = filtrarGastos({ fechaDesde, fechaHasta, etiquetasTiene: etiquetas });
-    return gastosFiltrados.reduce((acc = {}, gasto) => {
+    return gastosFiltrados.reduce((acc, gasto) => {
         let periodoAgrupacion = gasto.obtenerPeriodoAgrupacion(periodo);
-        acc[periodoAgrupacion] += gasto.valor;
+        acc[periodoAgrupacion] = (acc[periodoAgrupacion] || 0) + gasto.valor;
         return acc;
     }, {});
 }
