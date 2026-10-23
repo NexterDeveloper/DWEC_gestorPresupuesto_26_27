@@ -8,8 +8,7 @@ let idGasto = 0;
 
 function actualizarPresupuesto(valor) {
     if (typeof valor === "number" && valor >= 0 && !Number.isNaN(valor)) {
-        presupuesto = valor;
-        return presupuesto;
+        return presupuesto = valor;
     }
 
     console.error("Error: El presupuesto debe ser un número no negativo");
@@ -51,7 +50,7 @@ function CrearGasto(descripcion, valor, fecha, ...etiquetas) {
 
     this.mostrarGastoCompleto = function () {
         let texto = `Gasto correspondiente a ${this.descripcion} con valor ${this.valor} €.\n`;
-        texto += `Fecha: ${new Date(this.fecha).toLocaleString()}\n`;
+        texto += `Fecha: ${new Date(this.fecha).toLocaleString()}\n`; // new Date(this.fecha) para pasar de timestamp (milisegundos) en un objeto tipo fecha para usar funciones
         texto += "Etiquetas:\n";
 
         for (let etiqueta of this.etiquetas) {
@@ -77,32 +76,35 @@ function CrearGasto(descripcion, valor, fecha, ...etiquetas) {
             }
         }
     };
+    // tambien se puede hacer asi con set
+    /*
+    this.anyadirEtiquetas = function (...nuevasEtiquetas) {
+        this.etiquetas = [...new Set([...this.etiquetas, ...nuevasEtiquetas])];
+    };
+    */
 
     this.borrarEtiquetas = function (...etiquetasABorrar) {
         this.etiquetas = this.etiquetas.filter(
-            (etiqueta) => !etiquetasABorrar.includes(etiqueta)
+            etiqueta => !etiquetasABorrar.includes(etiqueta)
         );
     };
 
-    // Las etiquetas recibidas en el constructor se añaden con el propio método del objeto
+    // Las etiquetas recibidas en el constructor se añaden con el propio método del objeto para evitar errores
     this.anyadirEtiquetas(...etiquetas);
 
     this.obtenerPeriodoAgrupacion = function (periodo = "mes") {
         let fecha = new Date(this.fecha);
 
-        if (periodo === "anyo") {
-            return fecha.getFullYear();
+        switch (periodo) {
+            case "anyo":
+                return fecha.getFullYear();
+            case "mes":
+                return fecha.getFullYear() + "-" + (fecha.getMonth() + 1).toString().padStart(2, "0");
+            case "dia":
+                return fecha.getFullYear() + "-" + (fecha.getMonth() + 1).toString().padStart(2, "0") + "-" + fecha.getDate().toString().padStart(2, "0");
+            default:
+                return "";
         }
-
-        if (periodo === "mes") {
-            return fecha.getFullYear() + "-" + (fecha.getMonth() + 1).toString().padStart(2, "0");
-        }
-
-        if (periodo === "dia") {
-            return fecha.getFullYear() + "-" + (fecha.getMonth() + 1).toString().padStart(2, "0") + "-" + fecha.getDate().toString().padStart(2, "0");
-        }
-
-        return "";
     };
 }
 
@@ -111,17 +113,12 @@ function listarGastos() {
 }
 
 function anyadirGasto(gasto) {
-    gasto.id = idGasto;
-    idGasto++;
+    gasto.id = idGasto++;
     gastos.push(gasto);
 }
 
 function borrarGasto(id) {
-    let indice = gastos.findIndex((gasto) => gasto.id === id);
-
-    if (indice !== -1) {
-        gastos.splice(indice, 1);
-    }
+    gastos = gastos.filter(gasto => gasto.id !== id);
 }
 
 function calcularTotalGastos() {
@@ -130,36 +127,44 @@ function calcularTotalGastos() {
 
 function calcularBalance() {
     return presupuesto - calcularTotalGastos();
-
 }
 
-function filtrarGastos({ fechaDesde, fechaHasta, valorMinimo, valorMaximo, descripcionContiene, etiquetasTiene }) {
-    let gastosFiltrados = [];
-
-    for (let gasto of gastos) {
-        if (fechaDesde && gasto.fecha < Date.parse(fechaDesde)) {
-            continue;
+function filtrarGastos({ fechaDesde, fechaHasta, valorMinimo, valorMaximo, descripcionContiene, etiquetasTiene } = {}) {
+    return gastos.filter(gasto => {
+        if (fechaDesde !== undefined && gasto.fecha < Date.parse(fechaDesde)) {
+            return false;
         }
-        if (fechaHasta && gasto.fecha > Date.parse(fechaHasta)) {
-            continue;
+        if (fechaHasta !== undefined && gasto.fecha > Date.parse(fechaHasta)) {
+            return false;
         }
-        if (valorMinimo && gasto.valor < valorMinimo) {
-            continue;
+        if (valorMinimo !== undefined && gasto.valor < valorMinimo) {
+            return false;
         }
-        if (valorMaximo && gasto.valor > valorMaximo) {
-            continue;
+        if (valorMaximo !== undefined && gasto.valor > valorMaximo) {
+            return false;
         }
-        if (descripcionContiene && !gasto.descripcion.toLowerCase().includes(descripcionContiene.toLowerCase())) {
-            continue;
+        if (descripcionContiene !== undefined && !gasto.descripcion.toLowerCase().includes(descripcionContiene.toLowerCase())) {
+            return false;
         }
-        if (etiquetasTiene && etiquetasTiene.length > 0 && !gasto.etiquetas.some(etiqueta => etiquetasTiene.includes(etiqueta))) {
-            continue;
+        if (etiquetasTiene !== undefined && etiquetasTiene.length > 0 && !gasto.etiquetas.some(etiqueta => etiquetasTiene.includes(etiqueta))) {
+            return false;
         }
-        gastosFiltrados.push(gasto);
-    }
-
-    return gastosFiltrados;
+        return true;
+    });
 }
+// Alternativa a los if mas compacta y profesional
+/*
+function filtrarGastos({ fechaDesde, fechaHasta, valorMinimo, valorMaximo, descripcionContiene, etiquetasTiene } = {}) {
+    return gastos.filter(gasto =>
+        (fechaDesde === undefined || gasto.fecha >= Date.parse(fechaDesde)) &&
+        (fechaHasta === undefined || gasto.fecha <= Date.parse(fechaHasta)) &&
+        (valorMinimo === undefined || gasto.valor >= valorMinimo) &&
+        (valorMaximo === undefined || gasto.valor <= valorMaximo) &&
+        (descripcionContiene === undefined || gasto.descripcion.toLowerCase().includes(descripcionContiene.toLowerCase())) &&
+        (etiquetasTiene === undefined || etiquetasTiene.length === 0 || gasto.etiquetas.some(e => etiquetasTiene.includes(e)))
+    );
+}
+*/
 
 function agruparGastos(periodo = "mes", etiquetas = [], fechaDesde, fechaHasta = new Date().toISOString()) {
     let gastosFiltrados = filtrarGastos({ fechaDesde, fechaHasta, etiquetasTiene: etiquetas });
