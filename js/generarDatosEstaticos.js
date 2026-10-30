@@ -14,7 +14,36 @@ gp.anyadirGasto(new gp.CrearGasto("Gasolina", 60.42, "2021-10-08", "transporte",
 gp.anyadirGasto(new gp.CrearGasto("Seguro hogar", 206.45, "2021-09-26", "casa", "seguros"));
 gp.anyadirGasto(new gp.CrearGasto("Seguro coche", 195.78, "2021-10-06", "transporte", "seguros"));
 
+let gasto1 = new gp.CrearGasto("Coche", 200.54, "2021-10-12", "transporte", "gasolina");
+
 gpw.mostrarDatoEnId('gastos-totales', gp.calcularTotalGastos());
 
 gpw.mostrarDatoEnId('balance-total', gp.calcularBalance());
 
+let gastos = gp.listarGastos();
+gastos.forEach(gasto => {
+    gpw.mostrarGastoWeb('listado-gastos-completo', gasto);
+});
+
+let gastosFiltrados1 = gp.filtrarGastos({ fechaDesde: '2021-09-1', fechaHasta: '2021-09-30' });
+gastosFiltrados1.forEach(gasto => {
+    gpw.mostrarGastoWeb('listado-gastos-filtrado-1', gasto);
+});
+
+let gastosFiltrados2 = gp.filtrarGastos({ valorMinimo: 51 });
+gastosFiltrados2.forEach(gasto => {
+    gpw.mostrarGastoWeb('listado-gastos-filtrado-2', gasto);
+});
+
+let gastosFiltrados3 = gp.filtrarGastos({ valorMinimo: 201, etiquetasTiene: 'seguros' });
+gastosFiltrados3.forEach(gasto => {
+    gpw.mostrarGastoWeb('listado-gastos-filtrado-3', gasto);
+});
+
+let gastosFiltrados4 = gp.filtrarGastos({ valorMaximo: 49, etiquetasTiene: ['comida', 'transporte'] });
+gastosFiltrados4.forEach(gasto => {
+    gpw.mostrarGastoWeb('listado-gastos-filtrado-4', gasto);
+});
+
+let gastosAgrupadosPorDia = gp.agruparGastos('dia');
+gpw.mostrarGastosAgrupadosWeb('agrupacion-dia', gastosAgrupadosPorDia, 'dia');
